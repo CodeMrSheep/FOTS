@@ -1,0 +1,73 @@
+[sco_map, geo_maps, theta_map,featuremaps:] = dect_model(imgs)
+"""
+imgs: type:tensor, shape:[batchsize,224,224,3]
+
+sco_map:type:tensor, shape:[batchsize,56,56,1]
+geo_map:type:tensor, shape:[batchsize,56,56,4]
+theta_map:type:tensor, shape:[batchsize,56,56,1]
+featuremaps: type:tensor , shape:(batchsize,56,56,c)
+"""
+
+[loss] = detect_loss(trues,preds)
+"""
+trues : type:list ,shape: (3,) , content: [sco_map, geo_maps, theta_map]
+preds : type:list ,shape: (3,) , content: [sco_map, geo_maps, theta_map]
+
+loss : type: tensor ,shape:(1,)
+"""
+
+[loss] = cls_loss(true_sco_map,pred_sco_map)
+"""
+true_sco_map: type:tensor, shape:[batchsize,224,224,3]
+pred_sco_map: type:tensor, shape:[batchsize,224,224,3]
+
+loss : type: tensor ,shape:(1,)
+"""
+
+[loss] = geo_loss()
+"""
+"""
+
+[loss] = theta_loss()
+"""
+"""
+
+[text_featuremaps] = rotate_roi(featuremaps,outboxes,thetas,cropboxes)
+"""
+featuremaps: type:tensor , shape:(batchsize,56,56,c)
+outboxes: type:list , shape:(batchsize,?,4)
+thetas: type:list , shape:(batchsize,?,)
+cropboxes: type:list , shape:(batchsize,?,4)
+
+text_featuremaps: type: tensor, shape(batchsize,15,?,c)
+"""
+
+[] = recong_model(text_featuremaps)
+"""
+text_featuremaps: type: tensor, shape(batchsize,15,?,c)
+seq : type:tensor ,shape:(batchsize,?,units)
+"""
+
+[ctc_loss]=recong_loss(lable_trues,seq)
+"""
+lable_trues: type: numpy, shape:(batchsize,?)
+seq : type:tensor, shape:(batchsize,?,units)
+
+ctc_loss: type:tensor, shape:(1,)
+"""
+
+[res] = nms(sco_map,geo_maps,theta_map)
+"""
+sco_map:type:numpy, shape:[batchsize,56,56,1]
+sco_map:type:numpy, shape:[batchsize,56,56,4]
+theta_map:type:numpy, shape:[batchsize,56,56,1]
+
+res : type :list. res = [(boundingboxes,outboxes,thetas,cropboxes),(boundingboxes,outboxes,thetas,cropboxes),,,,,,,]
+boundingboxes: type:array, shape:[?,4]
+outboxes: type:array, shape:(?,4)
+thetas: type:array , shape:(?,)
+cropboxes: type:array, shape:(?,4)
+
+"""
+
+[] = recong(seq)
